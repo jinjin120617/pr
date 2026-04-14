@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2026 홍보추진계획 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e5e3dc;
+    --border-mid: #ccc9bf;
+    --text: #1a1a18;
+    --text-muted: #6b6960;
+    --text-hint: #9e9b93;
+    --accent-purple: #7F77DD;
+    --accent-teal: #1D9E75;
+    --accent-coral: #D85A30;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --radius-lg: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* header */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-left { display: flex; align-items: center; gap: 16px; }
+  .logo { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.02em; }
+  .logo span { color: var(--accent-teal); }
+  .tab-bar { display: flex; gap: 0; height: 56px; }
+  .tab {
+    padding: 0 18px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    height: 56px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--text); font-weight: 500; border-bottom-color: var(--text); }
+
+  /* layout */
+  main { max-width: 1200px; margin: 0 auto; padding: 28px 24px 60px; }
+
+  /* view toggle */
+  .view { display: none; }
+  .view.on { display: block; }
+
+  /* filters */
+  .page-title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; margin-bottom: 4px; }
+  .page-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .filter-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;
+    background: var(--surface);
+    padding: 14px 16px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+  }
+  .filter-group { display: flex; flex-direction: column; gap: 4px; }
+  .filter-label { font-size: 10px; color: var(--text-hint); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
+  select {
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+    min-width: 110px;
+    cursor: pointer;
+    outline: none;
+  }
+  select:focus { border-color: var(--accent-teal); }
+
+  /* stats */
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px,1fr)); gap: 10px; margin-bottom: 24px; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 14px 16px;
+    text-align: center;
+  }
+  .stat-num { font-size: 28px; font-weight: 600; letter-spacing: -0.03em; color: var(--text); }
+  .stat-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+  /* legend */
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
+  .legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+
+  /* month sections */
+  .month-section { margin-bottom: 28px; }
+  .month-header {
+    display: flex; align-items: center; gap: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .month-label { font-size: 14px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .month-count { font-size: 11px; color: var(--text-hint); background: var(--bg); border: 1px solid var(--border); padding: 1px 8px; border-radius: 20px; }
+
+  /* cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px,1fr)); gap: 10px; }
+  .item-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 13px 15px;
+    border-left: 3px solid var(--border-mid);
+    transition: box-shadow 0.15s, border-color 0.15s;
+  }
+  .item-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  .item-card.team-대외정책팀 { border-left-color: var(--accent-purple); }
+  .item-card.team-지역교류팀 { border-left-color: var(--accent-teal); }
+  .item-card.team-지역상생팀 { border-left-color: var(--accent-coral); }
+
+  .card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 7px; }
+  .project-name { font-size: 13px; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
+  .fmt-badge {
+    font-size: 10px; padding: 2px 7px; border-radius: 4px; white-space: nowrap; flex-shrink: 0;
+    font-weight: 500;
+  }
+  .fmt-숏폼 { background: #EEEDFE; color: #3C3489; }
+  .fmt-카드뉴스 { background: #E1F5EE; color: #085041; }
+  .fmt-게시글 { background: #FAECE7; color: #712B13; }
+  .fmt-블로그 { background: #E6F1FB; color: #0C447C; }
+  .fmt-영상 { background: #FAEEDA; color: #633806; }
+  .fmt-other { background: #f0ede6; color: #6b6960; }
+
+  .card-content { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 10px; }
+  .card-bottom { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px; }
+  .person-info { display: flex; align-items: center; gap: 7px; font-size: 11px; color: var(--text-muted); }
+  .avatar {
+    width: 22px; height: 22px; border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; flex-shrink: 0;
+  }
+  .av-백경진 { background: #EEEDFE; color: #3C3489; }
+  .av-심재민 { background: #E1F5EE; color: #085041; }
+  .av-백승윤 { background: #E6F1FB; color: #0C447C; }
+  .av-이연재 { background: #EAF3DE; color: #3B6D11; }
+  .av-이지예 { background: #FAECE7; color: #712B13; }
+  .av-김윤선 { background: #FAEEDA; color: #633806; }
+  .av-이예리 { background: #FCEBEB; color: #791F1F; }
+  .av-default { background: #f0ede6; color: #6b6960; }
+
+  .card-tags { display: flex; gap: 4px; flex-wrap: wrap; align-items: center; }
+  .sns-tag {
+    font-size: 10px; padding: 1px 6px; border-radius: 4px;
+    border: 1px solid var(--border); color: var(--text-hint);
+  }
+  .ai-tag { font-size: 10px; padding: 1px 6px; border-radius: 4px; background: #FAEEDA; color: #633806; font-weight: 500; }
+
+  .empty-state {
+    padding: 40px; text-align: center; color: var(--text-muted); font-size: 13px;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-md);
+  }
+
+  /* ===== 관리자 탭 ===== */
+  .admin-topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
+  }
+  .admin-title { font-size: 20px; font-weight: 600; letter-spacing: -0.02em; }
+  .admin-actions { display: flex; gap: 8px; align-items: center; }
+  .btn {
+    font-size: 12px; padding: 7px 14px;
+    border-radius: var(--radius-sm); cursor: pointer;
+    font-family: inherit; font-weight: 500;
+    transition: opacity 0.15s, background 0.15s;
+  }
+  .btn-secondary { border: 1px solid var(--border-mid); background: var(--surface); color: var(--text); }
+  .btn-secondary:hover { background: var(--bg); }
+  .btn-primary { border: 1px solid #1D9E75; background: #E1F5EE; color: #085041; }
+  .btn-primary:hover { opacity: 0.85; }
+  .save-msg { font-size: 12px; color: var(--accent-teal); font-weight: 500; }
+
+  .tbl-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface);
+  }
+  table.edit-tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.edit-tbl th {
+    background: var(--bg); color: var(--text-muted);
+    font-weight: 500; padding: 10px 10px;
+    text-align: left; border-bottom: 1px solid var(--border);
+    white-space: nowrap; font-size: 11px;
+  }
+  table.edit-tbl td {
+    padding: 5px 6px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  table.edit-tbl tr:last-child td { border-bottom: none; }
+  table.edit-tbl tr:hover td { background: #faf9f6; }
+  table.edit-tbl input[type=text], table.edit-tbl select {
+    padding: 5px 8px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--text);
+    font-size: 12px;
+    font-family: inherit;
+    width: 100%;
+    outline: none;
+  }
+  table.edit-tbl input[type=text]:focus, table.edit-tbl select:focus {
+    border-color: var(--accent-teal);
+  }
+  table.edit-tbl input[type=checkbox] { width: auto; margin: 0 2px; cursor: pointer; }
+  .btn-del {
+    padding: 3px 8px; font-size: 11px;
+    border: 1px solid #f09595; border-radius: 5px;
+    background: transparent; color: #A32D2D; cursor: pointer;
+    font-family: inherit;
+  }
+  .btn-del:hover { background: #FCEBEB; }
+
+  /* 비밀번호 오버레이 */
+  .pw-overlay {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 32px;
+    max-width: 360px;
+    margin: 60px auto;
+    text-align: center;
+  }
+  .pw-overlay h2 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
+  .pw-overlay p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+  .pw-row { display: flex; gap: 8px; justify-content: center; }
+  .pw-row input {
+    padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 13px;
+    font-family: inherit; outline: none; width: 180px;
+  }
+  .pw-row input:focus { border-color: var(--accent-teal); }
+  .pw-err { font-size: 12px; color: #A32D2D; margin-top: 10px; min-height: 18px; }
+
+  @media (max-width: 600px) {
+    header { padding: 0 16px; }
+    main { padding: 20px 14px 40px; }
+    .filter-row { gap: 8px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">대외협력과 <span>홍보계획</span></div>
+    <div class="tab-bar">
+      <button class="tab active" onclick="switchTab('main',this)">대시보드</button>
+      <button class="tab" onclick="switchTab('admin',this)">관리자 편집</button>
+    </div>
+  </div>
+</header>
+
+<main>
+
+  <!-- 대시보드 뷰 -->
+  <div class="view on" id="view-main">
+    <div class="page-title">2026 홍보추진계획 대시보드</div>
+    <div class="page-sub">대외협력과 사업별 온라인 홍보</div>
+
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">담당자</div>
+        <select id="personFilter"><option value="">전체 담당자</option></select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">팀</div>
+        <select id="teamFilter">
+          <option value="">전체 팀</option>
+          <option>대외정책팀</option><option>지역교류팀</option><option>지역상생팀</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">월</div>
+        <select id="monthFilter">
+          <option value="">전체 월</option>
+          <option value="4">4월</option><option value="5">5월</option><option value="6">6월</option>
+          <option value="7">7월</option><option value="8">8월</option><option value="9">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">추진방식</div>
+        <select id="formatFilter">
+          <option value="">전체</option>
+          <option>숏폼</option><option>카드뉴스</option><option>게시글</option><option>블로그</option><option>영상</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stats" id="statsRow"></div>
+
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-purple)"></div>대외정책팀</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-teal)"></div>지역교류팀</div>
+      <div class="legend-item"><div class="legend-dot" style="background:var(--accent-coral)"></div>지역상생팀</div>
+    </div>
+
+    <div id="mainContent"></div>
+  </div>
+
+  <!-- 관리자 뷰 -->
+  <div class="view" id="view-admin">
+
+    <!-- 비밀번호 화면 -->
+    <div id="pwScreen">
+      <div class="pw-overlay">
+        <h2>관리자 전용</h2>
+        <p>데이터를 수정하려면 비밀번호를 입력하세요</p>
+        <div class="pw-row">
+          <input type="password" id="pwInput" placeholder="비밀번호" onkeydown="if(event.key==='Enter')checkPw()">
+          <button class="btn btn-primary" onclick="checkPw()">확인</button>
+        </div>
+        <div class="pw-err" id="pwErr"></div>
+      </div>
+    </div>
+
+    <!-- 편집 화면 -->
+    <div id="editScreen" style="display:none">
+      <div class="admin-topbar">
+        <div>
+          <div class="admin-title">원데이터 편집</div>
+          <div style="font-size:13px;color:var(--text-muted);margin-top:2px">수정 후 반드시 저장 및 반영을 눌러주세요</div>
+        </div>
+        <div class="admin-actions">
+          <button class="btn btn-secondary" onclick="addRow()">+ 행 추가</button>
+          <button class="btn btn-primary" onclick="saveData()">저장 및 반영</button>
+          <span class="save-msg" id="saveMsg"></span>
+        </div>
+      </div>
+      <div class="tbl-wrap">
+        <table class="edit-tbl">
+          <thead>
+            <tr>
+              <th>월/시기</th>
+              <th style="min-width:110px">사업명</th>
+              <th style="min-width:220px">내용</th>
+              <th style="min-width:90px">추진방식</th>
+              <th>팀명</th>
+              <th style="min-width:60px">담당자</th>
+              <th>유튜브</th>
+              <th>인스타</th>
+              <th>블로그</th>
+              <th>페이스북</th>
+              <th>AI</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="editBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+const PW = "admin1234";
+const SNS_KEYS = ["유튜브","인스타그램","블로그","페이스북"];
+
+let DATA = [
+  {month:"4",project:"넥스트로컬(청년)",content:"청년 창업가 모집",format:"숏폼",team:"대외정책팀",person:"백경진",sns:["유튜브"],ai:true},
+  {month:"4",project:"넥스트로컬(청년)",content:"참여 청년의 지역창업 도전 스토리(2~3팀)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"4",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서울농장",content:"베이비앰베서더 농장체험(영월)",format:"영상",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"4",project:"서로장터",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:true},
+  {month:"4",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"4",project:"농부의시장",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:true},
+  {month:"4",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"5",project:"넥스트로컬(청년)",content:"영월 쪼매장 홍보",format:"숏폼",team:"대외정책팀",person:"백경진",sns:["유튜브"],ai:true},
+  {month:"5",project:"넥스트로컬(청년)",content:"신세계 팝업스토어(강남, 대구)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"4~5",project:"넥스트로컬(중장년)",content:"중장년 창업가 모집",format:"숏폼",team:"대외정책팀",person:"심재민",sns:["유튜브","인스타그램","블로그","페이스북"],ai:true},
+  {month:"5",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"5",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"5",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"5",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"5",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"5",project:"서로장터",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:true},
+  {month:"5",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"5",project:"농부의시장",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:true},
+  {month:"5",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"6",project:"넥스트로컬(청년)",content:"창업팀 최종선발 및 발대식",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"6",project:"넥스트로컬(중장년)",content:"창업팀 최종선발, 발대식",format:"카드뉴스",team:"대외정책팀",person:"심재민",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"6",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서울캠핑장",content:"서울블로그메이트 캠핑장 체험",format:"블로그",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"상반기",project:"서울농장",content:"서울농장 체험수기",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"상반기",project:"서울동행상회",content:"블로그메이트 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"6",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"상반기",project:"서로장터",content:"블로그메이트 홍보",format:"게시글",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"6",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"상반기",project:"농부의시장",content:"블로그메이트 홍보",format:"게시글",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"6~7",project:"넥스트로컬(청년)",content:"창업팀 지역현장방문(현장캠프)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"7~8",project:"넥스트로컬(중장년)",content:"창업팀 지역현장방문(현장캠프)",format:"카드뉴스",team:"대외정책팀",person:"심재민",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"8",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서울캠핑장",content:"서울블로그메이트 캠핑장 체험",format:"블로그",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"8",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"8",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"8~9",project:"넥스트로컬(청년)",content:"신세계 팝업스토어(부산, 광주)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"9",project:"넥스트로컬(청년)",content:"사업화과정 창업팀 소개(개발아이템, 펀딩, 서비스 개시 등)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"9",project:"넥스트로컬(청년)",content:"롯데카드 띵크어스데이",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"9",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서울캠핑장",content:"서울블로그메이트 캠핑장 체험",format:"블로그",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"9",project:"서로장터",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:true},
+  {month:"9",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"9",project:"농부의시장",content:"개장홍보",format:"숏폼",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:true},
+  {month:"9",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"8~9",project:"추석맞이 서로장터",content:"행사 홍보",format:"숏폼, 카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:true},
+  {month:"8~9",project:"추석맞이 서로장터",content:"이벤트 및 체험소개",format:"사진, 카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"10",project:"넥스트로컬(청년)",content:"선후배 네트워킹 홈커밍데이",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"10",project:"넥스트로컬(청년)",content:"사업화과정 창업팀 소개(개발아이템, 펀딩, 서비스 개시 등)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"10",project:"서울캠핑장",content:"캠핑장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서울캠핑장",content:"서울블로그메이트 캠핑장 체험",format:"블로그",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서울캠핑장",content:"캠핑장 현장스케치(관광지, 즐길거리, 캠핑장풍경 등)",format:"카드뉴스",team:"지역교류팀",person:"백승윤",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서울농장",content:"농장별 개장안내",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서울농장",content:"농장별 프로그램 안내(개설 3주전 업데이트)",format:"카드뉴스",team:"지역교류팀",person:"이연재",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"10",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"10",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"11",project:"넥스트로컬(청년)",content:"사업화과정 창업팀 소개(개발아이템, 펀딩, 서비스 개시 등)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"11",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"11",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"11",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"넥스트로컬(청년)",content:"사업화과정 창업팀 소개(개발아이템, 펀딩, 서비스 개시 등)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"넥스트로컬(청년)",content:"투자라운딩(중장년과 함께 추진)",format:"카드뉴스",team:"대외정책팀",person:"백경진",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"넥스트로컬(중장년)",content:"중장년 성과공유회",format:"카드뉴스",team:"대외정책팀",person:"심재민",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"넥스트로컬(중장년)",content:"투자라운딩(청년과 함께 추진)",format:"카드뉴스",team:"대외정책팀",person:"심재민",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"넥스트로컬(중장년)",content:"사업성과 홍보 영상",format:"숏폼 등",team:"대외정책팀",person:"심재민",sns:["유튜브","인스타그램","블로그","페이스북"],ai:false},
+  {month:"12",project:"서울동행상회",content:"기획전 홍보",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"하반기",project:"서울동행상회",content:"시민기자 취재홍보(내손안의서울)",format:"게시글",team:"지역상생팀",person:"이지예",sns:["인스타그램","블로그"],ai:false},
+  {month:"12",project:"서로장터",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"하반기",project:"서로장터",content:"시민기자 취재홍보(내손안의서울)",format:"게시글",team:"지역상생팀",person:"김윤선",sns:["인스타그램"],ai:false},
+  {month:"12",project:"농부의시장",content:"장터 일정, 행사장 품목, 우수농가, 현장홍보, 행사 이벤트 및 체험소개 각 1회",format:"카드뉴스",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+  {month:"하반기",project:"농부의시장",content:"시민기자 취재홍보(내손안의서울)",format:"게시글",team:"지역상생팀",person:"이예리",sns:["인스타그램","블로그","페이스북"],ai:false},
+];
+
+/* ── 탭 전환 ── */
+function switchTab(id, btn) {
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("on"));
+  document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+  document.getElementById("view-" + id).classList.add("on");
+  btn.classList.add("active");
+  if (id === "admin") {
+    const isUnlocked = document.getElementById("editScreen").style.display !== "none";
+    if (!isUnlocked) {
+      document.getElementById("pwScreen").style.display = "block";
+      document.getElementById("editScreen").style.display = "none";
+    }
+  }
+}
+
+/* ── 비밀번호 ── */
+function checkPw() {
+  if (document.getElementById("pwInput").value === PW) {
+    document.getElementById("pwScreen").style.display = "none";
+    document.getElementById("editScreen").style.display = "block";
+    buildEditTable();
+  } else {
+    document.getElementById("pwErr").textContent = "비밀번호가 올바르지 않습니다";
+    document.getElementById("pwInput").value = "";
+  }
+}
+
+/* ── 유틸 ── */
+function getMonthKey(m) {
+  const n = parseInt(m);
+  if (!isNaN(n)) return n;
+  if (m.includes("~")) return parseInt(m.split("~")[0]) || 99;
+  if (m === "상반기") return 6.5;
+  if (m === "하반기") return 12.5;
+  return 99;
+}
+function getFmtClass(f) {
+  if (!f) return "fmt-other";
+  for (const k of ["숏폼","카드뉴스","게시글","블로그","영상"]) if (f.includes(k)) return "fmt-" + k;
+  return "fmt-other";
+}
+function getAvClass(p) {
+  const m = {"백경진":"av-백경진","심재민":"av-심재민","백승윤":"av-백승윤","이연재":"av-이연재","이지예":"av-이지예","김윤선":"av-김윤선","이예리":"av-이예리"};
+  return m[p] || "av-default";
+}
+
+/* ── 담당자 필터 동기화 ── */
+function updatePersonFilter() {
+  const sel = document.getElementById("personFilter");
+  const cur = sel.value;
+  const list = [...new Set(DATA.map(d => d.person).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">전체 담당자</option>' + list.map(p => `<option ${p===cur?"selected":""}>${p}</option>`).join("");
+}
+
+/* ── 대시보드 렌더 ── */
+function applyRender() {
+  const pf = document.getElementById("personFilter").value;
+  const tf = document.getElementById("teamFilter").value;
+  const mf = document.getElementById("monthFilter").value;
+  const ff = document.getElementById("formatFilter").value;
+  let data = DATA.filter(d => {
+    if (pf && d.person !== pf) return false;
+    if (tf && d.team !== tf) return false;
+    if (mf && !d.month.includes(mf)) return false;
+    if (ff && !d.format.includes(ff)) return false;
+    return true;
+  });
+
+  document.getElementById("statsRow").innerHTML = `
+    <div class="stat-card"><div class="stat-num">${data.length}</div><div class="stat-lbl">총 콘텐츠 수</div></div>
+    <div class="stat-card"><div class="stat-num">${[...new Set(data.map(d=>d.person))].length}</div><div class="stat-lbl">담당자 수</div></div>
+    <div class="stat-card"><div class="stat-num">${data.filter(d=>d.ai).length}</div><div class="stat-lbl">AI 활용 콘텐츠</div></div>
+    <div class="stat-card"><div class="stat-num">${[...new Set(data.map(d=>d.project))].length}</div><div class="stat-lbl">사업 수</div></div>
+  `;
+
+  const main = document.getElementById("mainContent");
+  if (!data.length) { main.innerHTML = '<div class="empty-state">조건에 맞는 콘텐츠가 없습니다</div>'; return; }
+
+  const groups = {};
+  data.forEach(d => { if (!groups[d.month]) groups[d.month] = []; groups[d.month].push(d); });
+  const keys = Object.keys(groups).sort((a,b) => getMonthKey(a) - getMonthKey(b));
+
+  main.innerHTML = keys.map(m => {
+    const label = m.match(/^\d+$/) ? m + "월" : m;
+    const cards = groups[m].map(d => `
+      <div class="item-card team-${d.team}">
+        <div class="card-top">
+          <div class="project-name">${d.project}</div>
+          <span class="fmt-badge ${getFmtClass(d.format)}">${d.format}</span>
+        </div>
+        <div class="card-content">${d.content}</div>
+        <div class="card-bottom">
+          <div class="person-info">
+            <span class="avatar ${getAvClass(d.person)}">${(d.person||"?")[0]}</span>
+            <span>${d.person} · ${d.team}</span>
+          </div>
+          <div class="card-tags">
+            ${d.ai ? '<span class="ai-tag">AI</span>' : ""}
+            ${(d.sns||[]).map(s=>`<span class="sns-tag">${s}</span>`).join("")}
+          </div>
+        </div>
+      </div>`).join("");
+    return `<div class="month-section">
+      <div class="month-header">
+        <div class="month-label">${label}</div>
+        <div class="month-count">${groups[m].length}건</div>
+      </div>
+      <div class="card-grid">${cards}</div>
+    </div>`;
+  }).join("");
+}
+
+/* ── 관리자 편집 테이블 ── */
+function buildEditTable() {
+  const tbody = document.getElementById("editBody");
+  tbody.innerHTML = "";
+  DATA.forEach((d, i) => {
+    const tr = document.createElement("tr");
+    const snsChecks = SNS_KEYS.map(s =>
+      `<td style="text-align:center"><input type="checkbox" title="${s}" data-sns="${s}" ${d.sns.includes(s)?"checked":""}></td>`
+    ).join("");
+    tr.innerHTML = `
+      <td><input type="text" value="${d.month}" data-f="month" style="width:65px"></td>
+      <td><input type="text" value="${d.project}" data-f="project"></td>
+      <td><input type="text" value="${d.content}" data-f="content"></td>
+      <td><input type="text" value="${d.format}" data-f="format" style="width:85px"></td>
+      <td><select data-f="team" style="width:90px">
+        <option ${d.team==="대외정책팀"?"selected":""}>대외정책팀</option>
+        <option ${d.team==="지역교류팀"?"selected":""}>지역교류팀</option>
+        <option ${d.team==="지역상생팀"?"selected":""}>지역상생팀</option>
+      </select></td>
+      <td><input type="text" value="${d.person}" data-f="person" style="width:58px"></td>
+      ${snsChecks}
+      <td style="text-align:center"><input type="checkbox" data-f="ai" ${d.ai?"checked":""}></td>
+      <td><button class="btn-del" onclick="delRow(${i})">삭제</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+function addRow() {
+  DATA.push({month:"",project:"",content:"",format:"카드뉴스",team:"대외정책팀",person:"",sns:[],ai:false});
+  buildEditTable();
+  document.getElementById("editBody").lastElementChild.querySelector("input").focus();
+}
+
+function delRow(i) {
+  if (!confirm("이 행을 삭제하시겠습니까?")) return;
+  DATA.splice(i, 1);
+  buildEditTable();
+  applyRender();
+}
+
+function saveData() {
+  const rows = document.getElementById("editBody").querySelectorAll("tr");
+  rows.forEach((tr, i) => {
+    const d = DATA[i];
+    tr.querySelectorAll("[data-f]").forEach(el => {
+      if (el.dataset.f === "ai") d.ai = el.checked;
+      else d[el.dataset.f] = el.value;
+    });
+    d.sns = [];
+    tr.querySelectorAll("[data-sns]").forEach(cb => { if (cb.checked) d.sns.push(cb.dataset.sns); });
+  });
+  updatePersonFilter();
+  applyRender();
+  const msg = document.getElementById("saveMsg");
+  msg.textContent = "저장 완료!";
+  setTimeout(() => msg.textContent = "", 2500);
+}
+
+/* ── 초기화 ── */
+updatePersonFilter();
+applyRender();
+["personFilter","teamFilter","monthFilter","formatFilter"].forEach(id =>
+  document.getElementById(id).addEventListener("change", applyRender)
+);
+</script>
+</body>
+</html>
